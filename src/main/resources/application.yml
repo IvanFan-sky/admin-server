@@ -33,7 +33,7 @@ mybatis-plus:
       # logic-delete-field: deleted # 全局逻辑删除字段名 (如果需要)
       # logic-delete-value: 1 # 逻辑已删除值 (默认为 1)
       # logic-not-delete-value: 0 # 逻辑未删除值 (默认为 0)
-      id-type: assign_id # ID 生成策略，assign_id 表示手动分配或使用数据库自增 (根据需要调整)
+      id-type: ASSIGN_ID # ID 生成策略，ASSIGN_ID 表示手动分配或使用数据库自增 (根据需要调整)
   configuration:
     map-underscore-to-camel-case: true # 开启驼峰命名转换
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl # 使用 SLF4J 输出日志

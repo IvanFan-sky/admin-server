@@ -1,0 +1,23 @@
+# 生产环境特定配置
+# 例如，覆盖数据库连接信息、Redis 连接信息、日志级别等
+
+# spring:
+#   datasource:
+#     url: jdbc:mysql://pro-db-host:3306/admin_pro?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+#     username: pro_user
+#     password: pro_password
+#   data:
+#     redis:
+#       host: pro-redis-host
+#       port: 6379
+#       password: pro_redis_password # 生产环境通常有密码
+
+# logging:
+#   level:
+#     com.spark.adminserver: warn # 生产环境建议使用 warn 或 error 级别
+
+# management:
+#   endpoints:
+#     web:
+#       exposure:
+#         include: health,info # 生产环境按需暴露 Actuator 端点 
