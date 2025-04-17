@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spark.adminserver.mapper.UserMapper">
+
+    <!-- 定义 UserVO 的 ResultMap (可选，如果需要关联查询或字段名不一致) -->
+    <!-- 
+    <resultMap id="UserVOMap" type="com.spark.adminserver.model.vo.UserVO">
+        <id property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="nickname" column="nickname"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        -- 如果有关联的角色名
+        -- <collection property="roleNames" ofType="java.lang.String">
+        --    <result column="role_name"/>
+        -- </collection>
+    </resultMap>
+    -->
+
+    <!-- 分页查询用户信息 -->
+    <select id="selectUserPage" resultType="com.spark.adminserver.model.entity.User">
+        SELECT
+            user_id, username, nickname, email, phone, status, create_time, update_time
+            -- 不查询 password 和 deleted 字段
+        FROM
+            sys_user
+        <where>
+            deleted = 0 -- 只查询未删除的
+            <if test="query.username != null and query.username != ''">
+                AND username LIKE CONCAT('%', #{query.username}, '%')
+            </if>
+            <if test="query.phone != null and query.phone != ''">
+                AND phone = #{query.phone}
+            </if>
+            <if test="query.status != null">
+                AND status = #{query.status}
+            </if>
+            <!-- 添加其他查询条件 -->
+        </where>
+        <!-- 可以添加排序, PageHelper 会自动处理分页, 但排序仍需自行添加 -->
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 其他自定义 SQL 查询 -->
+
+</mapper> 

@@ -27,7 +27,7 @@ server:
 # Mybatis Plus 配置
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml # Mapper XML 文件位置
-  type-aliases-package: com.spark.adminserver.model # 实体类包路径 (根据实际项目结构修改)
+  type-aliases-package: com.spark.adminserver.model.entity # 实体类包路径 (Updated path)
   global-config:
     db-config:
       # logic-delete-field: deleted # 全局逻辑删除字段名 (如果需要)
@@ -37,6 +37,13 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true # 开启驼峰命名转换
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl # 使用 SLF4J 输出日志
+
+# PageHelper 配置
+pagehelper:
+  helper-dialect: mysql # 方言，根据数据库类型选择
+  reasonable: true # 启用合理化，pageNum<=0 时查询第一页，pageNum>pages 时查询最后一页
+  support-methods-arguments: true # 支持通过 Mapper 接口参数来传递分页参数
+  params: count=countSql # 用于支持 startPage 参数中的pageNum和pageSize 获取总数
 
 # Springdoc OpenAPI (Swagger) 配置
 springdoc:

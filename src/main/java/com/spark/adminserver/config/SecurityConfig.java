@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -25,7 +27,8 @@ public class SecurityConfig {
             "/swagger-ui.html",
             // 其他公开接口，例如登录、注册等 (根据实际情况添加)
             "/auth/login",
-            "/public/**"
+            "/public/**",
+            "/error" // 允许错误端点
     };
 
     @Bean
@@ -51,13 +54,13 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // TODO: 配置 PasswordEncoder (例如 BCryptPasswordEncoder)
-    /*
+    /**
+     * 配置密码编码器
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    */
 
     // TODO: 配置 AuthenticationManager (如果需要)
     /*
