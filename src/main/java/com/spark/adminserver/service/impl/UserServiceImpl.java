@@ -2,12 +2,10 @@ package com.spark.adminserver.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-// import com.baomidou.mybatisplus.extension.plugins.pagination.Page; // Removed for PageHelper
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.spark.adminserver.common.PageResult;
-import com.spark.adminserver.converter.UserConverter; // Import the converter
+import com.spark.adminserver.converter.UserConverter;
 import com.spark.adminserver.mapper.UserMapper;
 import com.spark.adminserver.model.dto.UserDTO;
 import com.spark.adminserver.model.dto.UserPageQueryDTO;
@@ -17,14 +15,12 @@ import com.spark.adminserver.service.IUserService;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-// import org.springframework.beans.BeanUtils; // No longer needed
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-// import java.util.stream.Collectors; // No longer needed for basic conversion
 
 /**
  * 用户服务实现类
@@ -38,9 +34,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private UserMapper userMapper;
 
     @Resource
-    private UserConverter userConverter; // Inject UserConverter
+    private UserConverter userConverter;
 
-    // PasswordEncoder Bean 需要在 SecurityConfig 中配置
     @Resource
     private PasswordEncoder passwordEncoder;
 
@@ -50,32 +45,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (user == null || user.getDeleted() == 1) {
             return null;
         }
-        UserVO userVO = userConverter.userToUserVO(user); // Use MapStruct
+        return userConverter.userToUserVO(user);
         // TODO: 查询并设置用户的角色信息到 userVO
-        return userVO;
     }
 
     @Override
     public PageResult<UserVO> getUserPage(UserPageQueryDTO queryDTO) {
-        // 1. 设置分页参数 (PageHelper)
-        PageHelper.startPage(queryDTO.getPageNum(), queryDTO.getPageSize());
+        // 创建分页对象
+        Page<User> page = new Page<>(queryDTO.getPageNum(), queryDTO.getPageSize());
+        // 执行分页查询
+        Page<User> userPage = userMapper.selectUserPage(page, queryDTO);
+        
+        // 转换结果
+        List<UserVO> userVOList = userConverter.usersToUserVOs(userPage.getRecords());
+        // TODO: 查询并设置用户的角色信息
 
-        // 2. 执行查询 (注意：紧跟 PageHelper.startPage 后面的第一个 Mybatis 查询会被分页)
-        List<User> userList = userMapper.selectUserPage(queryDTO);
-
-        // 3. 封装 PageInfo 对象 (获取分页信息)
-        PageInfo<User> pageInfo = new PageInfo<>(userList);
-
-        // 4. 转换 User 列表为 UserVO 列表 (Placeholder, MapStruct will handle this)
-        List<UserVO> userVOList = userConverter.usersToUserVOs(pageInfo.getList()); // Use MapStruct
-        // userVOList = userConverter.usersToUserVOs(pageInfo.getList()); // MapStruct usage
-
-        // 5. 封装 PageResult 返回
-        return new PageResult<>(pageInfo.getTotal(), userVOList);
+        return new PageResult<>(userPage.getTotal(), userVOList);
     }
 
     @Override
-    @Transactional // 涉及写操作，添加事务
+    @Transactional
     public Long createUser(UserDTO userDTO) {
         // 检查用户名是否已存在
         if (checkUsernameExists(userDTO.getUsername(), null)) {
@@ -90,7 +79,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new IllegalArgumentException("手机号已存在");
         }
 
-        User user = userConverter.userDTOToUser(userDTO); // Use MapStruct
+        // 使用 MapStruct 转换 DTO 到实体
+        User user = userConverter.userDTOToUser(userDTO);
 
         // 设置默认状态和密码加密
         user.setStatus(0); // 默认正常状态
@@ -110,7 +100,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
-    @Transactional // 涉及写操作，添加事务
+    @Transactional
     public boolean updateUser(Long userId, UserDTO userDTO) {
         User existingUser = this.getById(userId);
         if (existingUser == null || existingUser.getDeleted() == 1) {
@@ -130,14 +120,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new IllegalArgumentException("手机号已存在");
         }
 
-        User userToUpdate = userConverter.userDTOToUser(userDTO); // Use MapStruct
-        userToUpdate.setUserId(userId); // 确保 ID 被设置
+        // 创建要更新的用户对象
+        User userToUpdate = new User();
+        userToUpdate.setUserId(userId);
+        
+        // 使用 MapStruct 更新对象，忽略 null 值
+        userConverter.updateUserFromDTO(userDTO, userToUpdate);
 
-        // 密码处理：如果 DTO 中密码非空，则更新密码，否则保持原密码
+        // 密码处理：如果 DTO 中密码非空，则更新密码
         if (StringUtils.isNotBlank(userDTO.getPassword())) {
             userToUpdate.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        } else {
-            userToUpdate.setPassword(null); // Prevent MapStruct from overwriting with null if password wasn't in DTO
         }
 
         // 使用 MybatisPlus 的 updateById 方法更新 (null 值字段不会被更新)

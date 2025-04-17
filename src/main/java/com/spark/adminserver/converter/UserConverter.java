@@ -3,19 +3,15 @@ package com.spark.adminserver.converter;
 import com.spark.adminserver.model.dto.UserDTO;
 import com.spark.adminserver.model.entity.User;
 import com.spark.adminserver.model.vo.UserVO;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.*;
 
 import java.util.List;
 
 /**
  * 用户对象转换器
  */
-@Mapper(componentModel = "spring") // 让 Spring 能够扫描并注入
+@Mapper(componentModel = "spring")
 public interface UserConverter {
-
-    UserConverter INSTANCE = Mappers.getMapper(UserConverter.class);
 
     /**
      * User 转换为 UserVO
@@ -36,9 +32,13 @@ public interface UserConverter {
 
     /**
      * 使用 UserDTO 更新 User 对象 (忽略 DTO 中的 null 值)
-     * 注意：MapStruct 默认行为是覆盖，需要自定义或使用 @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-     * 但对于密码等字段，通常需要特殊处理，建议在 Service 层处理
+     * @param userDTO 用户DTO对象
+     * @param user 待更新的用户对象
      */
-    // void updateUserFromDTO(UserDTO userDTO, @MappingTarget User user);
-
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "password", ignore = true) // 密码需要在服务层单独处理加密
+    @Mapping(target = "deleted", ignore = true) // 逻辑删除标记不通过DTO更新
+    @Mapping(target = "createTime", ignore = true) // 创建时间不应通过DTO更新
+    @Mapping(target = "updateTime", ignore = true) // 更新时间由MybatisPlus自动处理
+    void updateUserFromDTO(UserDTO userDTO, @MappingTarget User user);
 } 
