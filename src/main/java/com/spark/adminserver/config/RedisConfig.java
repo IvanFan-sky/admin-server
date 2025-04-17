@@ -24,13 +24,13 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
 
-        // 使用 Jackson2JsonRedisSerializer 来序列化和反序列化 redis 的 value 值
-        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
+        // 配置 ObjectMapper
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        // enableDefaultTyping 方法在新版本中已被建议不使用，使用 activateDefaultTyping
         om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(om);
+
+        // 使用 ObjectMapper 创建 Jackson2JsonRedisSerializer
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(om, Object.class);
 
         // String 的序列化
         StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -53,14 +53,13 @@ public class RedisConfig {
     /*
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory factory) {
-        RedisSerializer<String> redisSerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-
-        // 配置序列化（解决乱码的问题）
+        // ... (Ensure ObjectMapper is configured and passed to Jackson2JsonRedisSerializer constructor here too)
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(om);
+
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(om, Object.class);
+        RedisSerializer<String> redisSerializer = new StringRedisSerializer();
 
         // 配置 CacheConfiguration
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
@@ -74,4 +73,4 @@ public class RedisConfig {
                 .build();
     }
     */
-} 
+}

@@ -74,11 +74,11 @@ management:
     health:
       show-details: always # Health 端点显示详细信息
 
-# 日志配置 (可以通过 logback-spring.xml 或 log4j2-spring.xml 进行更详细配置)
-logging:
-  level:
-    root: info # 全局日志级别
-    com.spark.adminserver: debug # 项目包日志级别
-    org.springframework.web: info
-    org.springframework.security: info
-    com.baomidou.mybatisplus: info # Mybatis Plus 日志级别
+# 日志配置由 logback-spring.xml 管理
+# logging:
+#   level:
+#     root: info # 全局日志级别
+#     com.spark.adminserver: debug # 项目包日志级别
+#     org.springframework.web: info
+#     org.springframework.security: info
+#     com.baomidou.mybatisplus: info # Mybatis Plus 日志级别

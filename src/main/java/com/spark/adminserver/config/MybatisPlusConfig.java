@@ -12,14 +12,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MybatisPlusConfig {
 
-    /**
-     * 添加分页插件
-     */
-    @Bean
-    public MybatisPlusInterceptor mybatisPlusInterceptor() {
-        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        // 添加 MySQL 分页插件
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
-        return interceptor;
-    }
+//    /**
+//     * 添加分页插件
+//     */
+//    @Bean
+//    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+//        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+//        // 添加 MySQL 分页插件
+//        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+//        return interceptor;
+//    }
 } 
