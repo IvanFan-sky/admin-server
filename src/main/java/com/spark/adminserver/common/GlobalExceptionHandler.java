@@ -1,6 +1,6 @@
 package com.spark.adminserver.common;
 
-import com.spark.adminserver.common.Result;
+import com.spark.adminserver.common.exception.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -23,12 +23,22 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * 处理业务异常 (例如 Service 层抛出的 IllegalArgumentException)
+     * 处理自定义服务异常
+     */
+    @ExceptionHandler(ServiceException.class)
+    public Result<?> handleServiceException(ServiceException e) {
+        log.warn("服务异常: code={}, message={}", e.getCode(), e.getMessage());
+        return Result.fail(e.getCode() != null ? e.getCode() : Result.FAIL, e.getMessage());
+    }
+
+    /**
+     * 处理业务参数异常 (如 Service 层直接抛出的 IllegalArgumentException)
+     * 通常建议封装为 ServiceException 抛出，但保留此处理作为兼容
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // 返回 400 状态码
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // 明确参数错误返回 400
     public Result<?> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.warn("业务参数异常: {}", e.getMessage());
+        log.warn("非法参数异常: {}", e.getMessage());
         return Result.fail(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 
@@ -42,7 +52,7 @@ public class GlobalExceptionHandler {
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining("; "));
         log.warn("请求体参数校验失败: {}", errorMsg);
-        return Result.fail(HttpStatus.BAD_REQUEST.value(), errorMsg);
+        return Result.fail(HttpStatus.BAD_REQUEST.value(), "参数校验失败: " + errorMsg);
     }
 
     /**
@@ -52,10 +62,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<?> handleBindException(BindException e) {
         String errorMsg = e.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                .map(fieldError -> String.format("%s: %s", fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.joining("; "));
         log.warn("请求参数绑定校验失败: {}", errorMsg);
-        return Result.fail(HttpStatus.BAD_REQUEST.value(), errorMsg);
+        return Result.fail(HttpStatus.BAD_REQUEST.value(), "参数绑定失败: " + errorMsg);
     }
 
     /**
@@ -64,8 +74,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public Result<?> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.warn("不支持的请求方法: {}", e.getMessage());
-        return Result.fail(HttpStatus.METHOD_NOT_ALLOWED.value(), "不支持的请求方法: " + e.getMethod());
+        log.warn("不支持的请求方法: Method={}, URI={}", e.getMethod(), e.getMessage().split("'?")[1]); // Extract URI if possible
+        return Result.fail(HttpStatus.METHOD_NOT_ALLOWED.value(), String.format("不支持的请求方法: %s", e.getMethod()));
     }
 
     /**
@@ -74,7 +84,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<?> handleRuntimeException(RuntimeException e) {
-        log.error("运行时异常: ", e); // 记录详细堆栈信息
+        log.error("未捕获的运行时异常: ", e); // 记录详细堆栈信息
+        // 不将具体异常信息暴露给前端
         return Result.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), "系统内部错误，请联系管理员");
     }
 
@@ -85,6 +96,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<?> handleException(Exception e) {
         log.error("系统异常: ", e);
+        // 不将具体异常信息暴露给前端
         return Result.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), "系统发生未知错误，请联系管理员");
     }
 } 
