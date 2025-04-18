@@ -2,7 +2,7 @@ package com.spark.adminserver.security.service;
 
 import com.spark.adminserver.model.entity.User;
 import com.spark.adminserver.service.IUserService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
     
-    @Resource
-    private IUserService userService;
+    private final IUserService userService;
     
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

@@ -12,7 +12,7 @@ import com.spark.adminserver.model.dto.UserPageQueryDTO;
 import com.spark.adminserver.model.entity.User;
 import com.spark.adminserver.model.vo.UserVO;
 import com.spark.adminserver.service.IUserService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,18 +26,14 @@ import java.util.Objects;
  * 用户服务实现类
  */
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    @Resource
-    private UserMapper userMapper;
-
-    @Resource
-    private UserConverter userConverter;
-
-    @Resource
-    private PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final UserConverter userConverter;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserVO getUserVOById(Long userId) {
@@ -182,6 +178,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         userToUpdate.setUserId(userId);
         userToUpdate.setPassword(passwordEncoder.encode(newPassword));
         return this.updateById(userToUpdate);
+    }
+
+    @Override
+    public User getByUsername(String username) {
+        return null;
+    }
+
+    @Override
+    public List<String> getUserRoles(Long userId) {
+        return List.of();
+    }
+
+    @Override
+    public List<String> getUserPermissions(Long userId) {
+        return List.of();
     }
 
     // --- 辅助方法 --- //
