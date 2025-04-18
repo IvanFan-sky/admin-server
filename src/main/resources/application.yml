@@ -6,13 +6,20 @@ spring:
   # Redis 配置 (根据实际情况修改)
   data:
     redis:
-      host: 127.0.0.1
+      host: localhost
       port: 6379
-      # password: your_redis_password # 如果有密码
-      database: 0 # 默认数据库
+      password:
+      database: 0
+      timeout: 10s
+      lettuce:
+        pool:
+          min-idle: 0
+          max-idle: 8
+          max-active: 8
+          max-wait: -1ms
   # 数据库配置 (根据实际情况修改)
   datasource:
-    url: jdbc:mysql://localhost:3306/admin_db?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    url: jdbc:mysql://localhost:3306/admin_dev?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,6 +30,8 @@ spring:
 # 服务器配置
 server:
   port: 8080 # 服务端口
+  servlet:
+    context-path: /
 
 # Mybatis Plus 配置
 mybatis-plus:
@@ -30,13 +39,13 @@ mybatis-plus:
   type-aliases-package: com.spark.adminserver.model.entity # 实体类包路径 (Updated path)
   global-config:
     db-config:
-      # logic-delete-field: deleted # 全局逻辑删除字段名 (如果需要)
-      # logic-delete-value: 1 # 逻辑已删除值 (默认为 1)
-      # logic-not-delete-value: 0 # 逻辑未删除值 (默认为 0)
-      id-type: ASSIGN_ID # ID 生成策略，ASSIGN_ID 表示手动分配或使用数据库自增 (根据需要调整)
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
   configuration:
     map-underscore-to-camel-case: true # 开启驼峰命名转换
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl # 使用 SLF4J 输出日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 使用 SLF4J 输出日志
 
 # Springdoc OpenAPI (Swagger) 配置
 springdoc:
@@ -46,7 +55,12 @@ springdoc:
     path: /swagger-ui.html # Swagger UI 路径
     display-request-duration: true # 显示请求耗时
     groups-order: DESC # 分组排序
+    tags-sorter: alpha
+    operations-sorter: method
   packages-to-scan: com.spark.adminserver.controller # Controller 包路径 (根据实际项目结构修改)
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
   # 基本信息配置 (可选)
   # info:
   #   title: Admin Server API
@@ -68,4 +82,28 @@ management:
       show-details: always # Health 端点显示详细信息
 
 # 日志配置由 logback-spring.xml 管理
+logging:
+  level:
+    com.spark.adminserver: debug
+    org.springframework: warn
+
+# JWT配置
+jwt:
+  # JWT加解密使用的密钥
+  secret: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789
+  # JWT的有效期（2小时），单位毫秒
+  expiration: 7200000
+  # 刷新令牌的有效期（7天），单位毫秒
+  refresh-expiration: 604800000
+
+# 验证码配置
+captcha:
+  # 验证码类型：arithmetic-算术验证码, spec-常规验证码, gif-GIF动画验证码, chinese-中文验证码, chinese_gif-中文GIF验证码
+  type: arithmetic
+  # 验证码长度，算术验证码表示运算位数
+  length: 4
+  # 验证码宽度
+  width: 130
+  # 验证码高度
+  height: 48
 

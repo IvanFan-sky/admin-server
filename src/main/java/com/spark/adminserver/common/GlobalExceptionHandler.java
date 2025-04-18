@@ -1,6 +1,6 @@
 package com.spark.adminserver.common;
 
-import com.spark.adminserver.common.exception.ServiceException;
+import com.spark.adminserver.common.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -23,17 +23,17 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * 处理自定义服务异常
+     * 处理自定义业务异常
      */
-    @ExceptionHandler(ServiceException.class)
-    public Result<?> handleServiceException(ServiceException e) {
-        log.warn("服务异常: code={}, message={}", e.getCode(), e.getMessage());
-        return Result.fail(e.getCode() != null ? e.getCode() : Result.FAIL, e.getMessage());
+    @ExceptionHandler(BusinessException.class)
+    public Result<?> handleBusinessException(BusinessException e) {
+        log.warn("业务异常: code={}, message={}", e.getCode(), e.getMessage());
+        return Result.fail(e.getCode(), e.getMessage());
     }
 
     /**
      * 处理业务参数异常 (如 Service 层直接抛出的 IllegalArgumentException)
-     * 通常建议封装为 ServiceException 抛出，但保留此处理作为兼容
+     * 通常建议封装为 BusinessException 抛出，但保留此处理作为兼容
      */
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 明确参数错误返回 400

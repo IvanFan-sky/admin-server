@@ -7,6 +7,8 @@ import com.spark.adminserver.model.dto.UserDTO;
 import com.spark.adminserver.model.dto.UserPageQueryDTO;
 import com.spark.adminserver.model.vo.UserVO;
 
+import java.util.List;
+
 /**
  * 用户服务接口
  */
@@ -70,6 +72,30 @@ public interface IUserService extends IService<User> {
      * @return 是否成功
      */
     boolean resetPassword(Long userId, String newPassword);
+
+    /**
+     * 根据用户名获取用户
+     *
+     * @param username 用户名
+     * @return 用户对象
+     */
+    User getByUsername(String username);
+
+    /**
+     * 获取用户角色
+     *
+     * @param userId 用户ID
+     * @return 角色标识列表
+     */
+    List<String> getUserRoles(Long userId);
+
+    /**
+     * 获取用户权限
+     *
+     * @param userId 用户ID
+     * @return 权限标识列表
+     */
+    List<String> getUserPermissions(Long userId);
 
     // TODO: 添加更新用户角色等方法
     // boolean updateUserRoles(Long userId, List<Long> roleIds);
